@@ -166,9 +166,52 @@ bet-analytics-pipeline/
 
 ---
 
+## 10. KPIs do Gold (Power BI)
+
+**Decisão:** 14 KPIs organizados em 4 abas, cruzando as duas APIs.
+
+**Escopo:** apenas futebol. A Odds API será filtrada para esportes `soccer_*` para manter coerência com a API-Football.
+
+### Aba 1 — Visão do Mercado (fonte: Odds API)
+
+| KPI | Descrição |
+|-----|-----------|
+| Odds média por time | Evolução das cotações ao longo da temporada — o mercado confia mais ou menos no time? |
+| Dispersão entre bookmakers | Para o mesmo jogo, as casas concordam ou divergem nas cotações? |
+| Evolução da odd pré-jogo | A odd do favorito abre ou fecha conforme o jogo se aproxima? |
+| Distribuição por mercado | Comparação de odds entre mercados (h2h, spreads, totals) |
+
+### Aba 2 — Desempenho Real (fonte: API-Football)
+
+| KPI | Descrição |
+|-----|-----------|
+| Aproveitamento por time | Vitórias / jogos na temporada |
+| Gols marcados vs sofridos | Saldo de gols com split casa vs fora |
+| Estatísticas médias por jogo | Posse, chutes no gol, escanteios (média por partida) |
+| Classificação da liga | Standings atualizado da competição |
+
+### Aba 3 — Mercado vs Realidade (cruzamento das duas APIs)
+
+| KPI | Descrição |
+|-----|-----------|
+| Taxa de acerto do favorito | Time com menor odd (favorito segundo o mercado) de fato ganhou? |
+| Odds do favorito por resultado | Odd média do favorito quando ganha vs quando perde |
+| Forma recente vs odds | Correlação entre desempenho nos últimos 5 jogos e movimento das cotações |
+| Times subvalorizados | Bom desempenho mas odds altas — mercado não acredita |
+| Times supervalorizados | Desempenho fraco mas odds baixas — mercado confia demais |
+
+### Aba 4 — Por Campeonato (filtro transversal)
+
+| KPI | Descrição |
+|-----|-----------|
+| Acurácia do mercado por liga | O mercado erra mais na Premier League ou no Brasileirão? |
+
+Todas as métricas das abas 1-3 são filtráveis por liga nesta aba.
+
+---
+
 ## PENDENTE
 
-- [ ] KPIs do Gold (quais métricas o Power BI vai exibir)
 - [ ] Modelagem das tabelas Bronze / Silver / Gold
 - [ ] Diagrama detalhado do fluxo de dados (ASCII para o README)
 - [ ] Definição dos esportes/ligas que serão coletados
