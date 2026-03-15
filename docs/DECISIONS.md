@@ -18,12 +18,33 @@
 
 **Decisão:** The Odds API (v4) + API-Football (v3)
 
-- **The Odds API:** fornece odds (cotações) de múltiplas casas de apostas, scores (resultados), e lista de eventos esportivos. É o core do pipeline — o dado de apostas vem daqui.
-- **API-Football:** complementa com dados esportivos que a Odds API não tem: estatísticas de jogo, escalações, classificações de ligas, detalhes de times.
-
 **Por que duas APIs:** nenhuma das duas sozinha cobre o escopo completo. A Odds API é forte em dados de apostas (odds, bookmakers, mercados) mas fraca em dados esportivos. A API-Football é o inverso. Combinadas, permitem cruzar odds com contexto esportivo — que é onde surgem os KPIs mais interessantes pro BI.
 
-**Chave de junção:** ambas compartilham identificadores de eventos (`id` na Odds API, `fixture_id` na API-Football) que permitem cruzamento no Silver.
+### The Odds API — 4 endpoints
+
+| Endpoint | Dados retornados | Papel no pipeline |
+|----------|-----------------|-------------------|
+| `GET /v4/sports` | Lista de esportes (`key`, `group`, `title`, `active`, `has_outrights`) | Referência — dimensão de esportes |
+| `GET /v4/sports/{sport}/events` | Jogos futuros/ao vivo (`id`, `sport_key`, `sport_title`, `commence_time`, `home_team`, `away_team`) | Core — lista de eventos |
+| `GET /v4/sports/{sport}/odds` | Cotações por bookmaker/mercado. Aninhado: evento → bookmakers[] → markets[] → outcomes[] (`name`, `price`) | Core — dado central de apostas |
+| `GET /v4/sports/{sport}/scores` | Resultados (`id`, `completed`, `scores[]` com `name` + `score`) | Core — placar dos eventos |
+
+**Chave de junção interna:** campo `id` compartilhado entre events, odds e scores.
+
+### API-Football — 6 endpoints
+
+| Endpoint | Dados retornados | Papel no pipeline |
+|----------|-----------------|-------------------|
+| `GET /v3/leagues` | Ligas com país, temporadas e cobertura por temporada | Referência — dimensão de ligas |
+| `GET /v3/teams` | Times com país, fundação e estádio | Referência — dimensão de times |
+| `GET /v3/teams/statistics` | Stats agregadas por time/temporada: forma, gols por minuto, over/under, clean sheets, cartões, formações | Gold — métricas de performance |
+| `GET /v3/fixtures` | Partidas com placar por período, liga, times, status, árbitro, estádio | Core — partidas com contexto esportivo |
+| `GET /v3/fixtures/statistics` | Stats por partida por time: chutes, posse, cartões, passes. Formato `{type, value}` — pivotar no Silver | Core — estatísticas por jogo |
+| `GET /v3/standings` | Classificação: posição, pontos, saldo, forma, desempenho casa/fora, zonas | Core — tabela da liga |
+
+**Chave de junção interna:** `fixture.id` conecta fixtures ↔ fixtures/statistics. `league.id` + `season` conecta leagues ↔ standings ↔ teams/statistics. `team.id` conecta teams com todas as tabelas.
+
+**Cruzamento entre APIs:** resolvido no Silver por mapeamento de **time + data** (não há ID compartilhado entre as duas APIs).
 
 ---
 
@@ -33,7 +54,7 @@
 
 **Decisão:** httpx (async)
 
-**Por quê:** o pipeline faz múltiplas chamadas a duas APIs diferentes. httpx suporta async nativo, o que permite disparar requisições em paralelo sem bloquear. Também suporta sync para casos simples, tem API compatível com requests (curva de aprendizado baixa), e suporte nativo a HTTP/2.
+**Por quê:** o pipeline faz múltiplas chamadas a duas APIs diferentes (10 endpoints no total). httpx suporta async nativo, o que permite disparar requisições em paralelo sem bloquear. Também suporta sync para casos simples, tem API compatível com requests (curva de aprendizado baixa), e suporte nativo a HTTP/2.
 
 **Alternativas consideradas:**
 - **requests:** sync only. Para múltiplas chamadas de API, seria sequencial e mais lento. Não justifica quando httpx faz tudo que requests faz + async.
@@ -147,8 +168,7 @@ bet-analytics-pipeline/
 
 ## PENDENTE
 
-- [ ] KPIs do Gold (depende da exploração completa das APIs)
+- [ ] KPIs do Gold (quais métricas o Power BI vai exibir)
 - [ ] Modelagem das tabelas Bronze / Silver / Gold
-- [ ] Endpoints definitivos da API-Football
 - [ ] Diagrama detalhado do fluxo de dados (ASCII para o README)
 - [ ] Definição dos esportes/ligas que serão coletados

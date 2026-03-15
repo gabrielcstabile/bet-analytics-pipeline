@@ -24,6 +24,29 @@ Co-piloto pedagógico. NÃO gere código completo. Explique o que precisa ser fe
 | Ambiente | uv |
 | Linting | ruff |
 
+## Endpoints do pipeline
+
+### The Odds API (v4) — base: `https://api.the-odds-api.com`
+
+- `GET /v4/sports` → esportes disponíveis
+- `GET /v4/sports/{sport}/events` → lista de jogos (id, times, horário)
+- `GET /v4/sports/{sport}/odds` → cotações por bookmaker/mercado (aninhado)
+- `GET /v4/sports/{sport}/scores` → resultados (placar, completed)
+
+Chave: `id` compartilhado entre events/odds/scores.
+
+### API-Football (v3) — base: `https://v3.football.api-sports.io`
+
+- `GET /v3/leagues` → ligas + cobertura por temporada
+- `GET /v3/teams` → times + estádio
+- `GET /v3/teams/statistics` → stats agregadas por time/temporada
+- `GET /v3/fixtures` → partidas com placar, liga, times, status
+- `GET /v3/fixtures/statistics` → stats por partida/time (formato {type, value} — pivotar no Silver)
+- `GET /v3/standings` → classificação por liga/temporada
+
+Chaves: `fixture.id`, `league.id` + `season`, `team.id`.
+Cruzamento entre APIs: time + data (sem ID compartilhado).
+
 ## Estrutura
 
 ```

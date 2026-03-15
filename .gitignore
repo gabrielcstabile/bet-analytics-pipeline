@@ -17,9 +17,6 @@ build/
 *-credentials.json
 *-key.json
 
-# uv
-uv.lock
-
 # IDE
 .vscode/
 .idea/
